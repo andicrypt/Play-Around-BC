@@ -16,26 +16,25 @@ database:
   max_idle_conns: 10
   debug: true
 listener:
-  ethereum:
-    contracts:
-      seaport:
-        address: "0x00000000006c3852cbef3e08e8df289169ede581"
-        abi: "/Users/dien.transkymavis.com/Documents/andicrypt/Play-Around-BC/generated_contracts/Seaport.json"
-        name: "Seaport Controller Proxy"
-    # rpc: "https://eth-mainnet.g.alchemy.com/v2/-1vrdcvZqQkRoCznsrrs7Bv7lxrb6Txr"
-    rpc: "https://eth-goerli.g.alchemy.com/v2/0EcWWGpuYHAOuXQhHeagpC_UhlEXvfYh"
-    from_block: 9023330
-    safe_block_range: 
-    handlers:
-      - contract: "seaport"
-        event: "OrderCancelled"
-        handler: "OrderCancelledHandler"
-        description: "handle event of cancelling an order"
-      - contract: "seaport"
-        event: "OrderFulfilled"
-        handler: "OrderFulfilledHandler"
-        description: "handle event of fulfilling an order"
-      - contract: "seaport"
-        event: "OrderValidated"
-        handler: "OrderValidatedHandler"
-        description: "handle event of validating an order"
+  contracts:
+    seaport:
+      address: "0x00000000006c3852cbef3e08e8df289169ede581"
+      abi: "/Users/dien.transkymavis.com/Documents/andicrypt/Play-Around-BC/generated_contracts/Seaport.json"
+      name: "Seaport Controller Proxy"
+  # rpc: "https://eth-mainnet.g.alchemy.com/v2/-1vrdcvZqQkRoCznsrrs7Bv7lxrb6Txr"
+  rpc: "https://eth-goerli.g.alchemy.com/v2/0EcWWGpuYHAOuXQhHeagpC_UhlEXvfYh"
+  from_block: 9023330
+  safe_block_range: 
+  handlers:
+    - contract: "seaport"
+      event: "OrderCancelled"
+      handler: "OrderCancelledHandler"
+      description: "handle event of cancelling an order"
+    - contract: "seaport"
+      event: "OrderFulfilled"
+      handler: "OrderFulfilledHandler"
+      description: "handle event of fulfilling an order"
+    - contract: "seaport"
+      event: "OrderValidated"
+      handler: "OrderValidatedHandler"
+      description: "handle event of validating an order"

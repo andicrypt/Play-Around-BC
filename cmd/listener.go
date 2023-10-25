@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	bridge_core "github.com/axieinfinity/bridge-core"
+	"github.com/axieinfinity/bridge-core/models"
 	"github.com/axieinfinity/bridge-core/stores"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/log"
@@ -21,7 +22,7 @@ import (
 
 const (
 	defaultMaxLogsBatch   = 100
-	defaultSafeBlockRange = 10
+	defaultSafeBlockRange = 41926
 	defaultRPC = "https://eth-goerli.g.alchemy.com/v2/0EcWWGpuYHAOuXQhHeagpC_UhlEXvfYh"
 	defaultFromBlock = 9023330
 
@@ -189,6 +190,11 @@ func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
 		panic(err)
 	}
 
+	db.AutoMigrate(
+		&models.ProcessedBlock{},
+		&models.Job{},
+	)
+
 	return bridgeConfig, db
 }
 
@@ -206,7 +212,7 @@ func startListener(ctx *cli.Context) {
 	}
 	fmt.Println("hello 4")
 
-	
+	fmt.Printf("controller %+v", controller)
 	if err = controller.Start(); err != nil {
 		panic(err)
 	}
