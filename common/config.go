@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -32,6 +33,9 @@ type Database struct {
 func Load(path string, cfg interface{}) {
 	viper.SetConfigType("yaml")
 	if path != "" {
+		// p, _ := os.Getwd()
+		// plan, err := os.ReadFile(filepath.Join(p, path))
+		// fmt.Println(filepath.Join(p, path))
 		plan, err := os.ReadFile(path)
 		if err != nil {
 			panic(err)
@@ -49,6 +53,6 @@ func Load(path string, cfg interface{}) {
 	if err != nil {
 		panic(err)
 	}
-
+	fmt.Printf("my config %+v\n", cfg)
 
 }

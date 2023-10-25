@@ -24,6 +24,7 @@ func MustConnectDatabaseWithName(dbConfig *Database, dbName string, testing bool
 		}
 	} else {
 		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", dbConfig.Host, dbConfig.User, dbConfig.Password, dbName, dbConfig.Port)
+		fmt.Println(dsn)
 		dialect := postgres.Open(dsn)
 		db, err = gorm.Open(dialect, &gorm.Config{})
 		if err != nil {

@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"os/signal"
+	"runtime/debug"
+	"syscall"
 
 	bridge_core "github.com/axieinfinity/bridge-core"
 	"github.com/axieinfinity/bridge-core/stores"
@@ -20,7 +22,11 @@ import (
 const (
 	defaultMaxLogsBatch   = 100
 	defaultSafeBlockRange = 10
+	defaultRPC = "https://eth-goerli.g.alchemy.com/v2/0EcWWGpuYHAOuXQhHeagpC_UhlEXvfYh"
+	defaultFromBlock = 9023330
+
 )
+
 
 type Listener struct {
 	RPC            string               `yaml:"rpc" mapstructure:"rpc"`
@@ -69,14 +75,25 @@ type ListenerConfig struct {
 }
 
 func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
+	fmt.Println("kakaka", path)
 	cfg := &ListenerConfig{}
 	common.Load(path, cfg)
+	fmt.Printf("my config2 %+v\n", cfg)
 	log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(cfg.Verbosity), log.StreamHandler(os.Stderr, log.TerminalFormat(true))))
 	if cfg.Listener.SafeBlockRange == 0 {
 		cfg.Listener.SafeBlockRange = defaultSafeBlockRange
 	}
+	if cfg.Listener.RPC == "" {
+		cfg.Listener.RPC = defaultRPC
+	}
+	if cfg.Listener.SafeBlockRange == 0 {
+		cfg.Listener.SafeBlockRange = defaultSafeBlockRange
+	}
+	if cfg.Listener.FromBlock == 0 {
+		cfg.Listener.FromBlock = defaultFromBlock
+	}
 
-	// load ronin listener
+	// load ethereum listener
 	ethereumConfig := &bridge_core.LsConfig{
 		ChainId:          cfg.ChainId,
 		Name:             "ETHEREUM",
@@ -87,6 +104,17 @@ func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
 		GetLogsBatchSize: defaultMaxLogsBatch,
 		Contracts:        make(map[string]string),
 	}
+
+	// ethereumConfig := &bridge_core.LsConfig{
+	// 	ChainId:          cfg.ChainId,
+	// 	Name:             "ETHEREUM",
+	// 	RpcUrl:           "https://eth-goerli.g.alchemy.com/v2/0EcWWGpuYHAOuXQhHeagpC_UhlEXvfYh",
+	// 	SafeBlockRange:   3,
+	// 	FromHeight:       7126945,
+	// 	Subscriptions:    make(map[string]*bridge_core.Subscribe),
+	// 	GetLogsBatchSize: defaultMaxLogsBatch,
+	// 	Contracts:        make(map[string]string),
+	// }
 
 	if cfg.Listener.LogBatchSize > 0 {
 		ethereumConfig.GetLogsBatchSize = cfg.Listener.LogBatchSize
@@ -102,7 +130,8 @@ func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
 			panic(fmt.Sprintf("%s not found", handler.Contract))
 		}
 		// load abi from ABI path
-		abiFile, err := ioutil.ReadFile(contract.AbiPath)
+		fmt.Println("ppppp", contract.AbiPath)
+		abiFile, err := os.ReadFile(contract.AbiPath)
 		if err != nil {
 			panic(err)
 		}
@@ -159,44 +188,42 @@ func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
 	if err != nil {
 		panic(err)
 	}
-	// listeners.HttpClient = cfg.HTTP.MakeClient(nil)
-	// common.EthDomainName = cfg.Domain.Ethereum
-	// common.RoninDomainName = cfg.Domain.Ronin
+
 	return bridgeConfig, db
 }
 
 func startListener(ctx *cli.Context) {
 	fmt.Println("hello 0")
-
+	fmt.Println("hhhh", ctx.String("config"))
 
 	cfg, db := loadConfigAndDB(ctx.String("config"))
+	// cfg, db := loadConfigAndDB(path)
+
+	fmt.Printf("config10 %+v", cfg)
 	controller, err := listeners.NewController(cfg, db, nil)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("hello 4")
 
-	// run migrate
-	if err = controller.Migrate(db); err != nil {
-		panic(err)
-	}
+	
 	if err = controller.Start(); err != nil {
 		panic(err)
 	}
-
-	// sigc := make(chan os.Signal, 1)
-	// signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
-	// defer signal.Stop(sigc)
-	// <-sigc
-	// go func() {
-	// 	for i := 10; i > 0; i-- {
-	// 		<-sigc
-	// 		if i > 1 {
-	// 			log.Warn("Already shutting down, interrupt more to panic.", "times", i-1)
-	// 		}
-	// 	}
-	// 	debug.SetTraceback("all")
-	// 	panic("boom")
-	// }()
-	// controller.Close()
-
+	fmt.Println("hello 5")
+	sigc := make(chan os.Signal, 1)
+	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(sigc)
+	<-sigc
+	go func() {
+		for i := 10; i > 0; i-- {
+			<-sigc
+			if i > 1 {
+				log.Warn("Already shutting down, interrupt more to panic.", "times", i-1)
+			}
+		}
+		debug.SetTraceback("all")
+		panic("boom")
+	}()
+	controller.Close()
 }

@@ -13,18 +13,11 @@ func main() {
 		},
 	}
 	app := &cli.App{
-		Name:   "crawler",
-		Usage:  "",
-		Action: startCrawler,
+		Name:   "listener",
+		Usage:  "start listener which listens to contract events",
 		Flags:  flags,
-		Commands: []cli.Command{
-			{
-				Name:   "listener",
-				Usage:  "start listener which listens to contract events",
-				Action: startListener,
-				Flags:  flags,
-			},
-		},
+		Action: startListener,
+		Commands: []cli.Command{},
 	}
 
 	if err := app.Run(os.Args); err != nil {

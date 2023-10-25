@@ -1,6 +1,7 @@
 default:
-	cd cmd/abigen && go install && cd ../../
-	cd cmd/crawler && go install
+	cd cmd/ && go build && mv cmd ../execfile
+run:
+	./execfile --config $(CONFIG)
 
 build-abigen:
 	cd cmd/abigen && go build
@@ -8,3 +9,4 @@ build-abigen:
 build-resolver:
 	cd cmd/resolver && go build listener.go resolver.go main.go
 
+ 
