@@ -76,7 +76,6 @@ type ListenerConfig struct {
 }
 
 func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
-	fmt.Println("kakaka", path)
 	cfg := &ListenerConfig{}
 	common.Load(path, cfg)
 	fmt.Printf("my config2 %+v\n", cfg)
@@ -131,7 +130,6 @@ func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
 			panic(fmt.Sprintf("%s not found", handler.Contract))
 		}
 		// load abi from ABI path
-		fmt.Println("ppppp", contract.AbiPath)
 		abiFile, err := os.ReadFile(contract.AbiPath)
 		if err != nil {
 			panic(err)
@@ -199,30 +197,24 @@ func loadConfigAndDB(path string) (*bridge_core.Config, *gorm.DB) {
 }
 
 func startListener(ctx *cli.Context) {
-	fmt.Println("hello 0")
-	fmt.Println("hhhh", ctx.String("config"))
-
 	cfg, db := loadConfigAndDB(ctx.String("config"))
-	// cfg, db := loadConfigAndDB(path)
 
-	fmt.Printf("config10 %+v", cfg)
 	controller, err := listeners.NewController(cfg, db, nil)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("hello 4")
 
-	fmt.Printf("controller %+v", controller)
 	if err = controller.Start(); err != nil {
 		panic(err)
 	}
-	fmt.Println("hello 5")
+
+
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	defer signal.Stop(sigc)
 	<-sigc
 	go func() {
-		for i := 10; i > 0; i-- {
+		for i := 2; i > 0; i-- {
 			<-sigc
 			if i > 1 {
 				log.Warn("Already shutting down, interrupt more to panic.", "times", i-1)
@@ -231,5 +223,6 @@ func startListener(ctx *cli.Context) {
 		debug.SetTraceback("all")
 		panic("boom")
 	}()
+
 	controller.Close()
 }

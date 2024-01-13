@@ -1,7 +1,7 @@
 default:
-	cd cmd/ && go build && mv cmd ../execfile
+	cd cmd/ && go build
 run:
-	./execfile --config $(CONFIG)
+	cmd/cmd --config $(CONFIG)
 
 build-abigen:
 	cd cmd/abigen && go build

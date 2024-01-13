@@ -33,9 +33,6 @@ type Database struct {
 func Load(path string, cfg interface{}) {
 	viper.SetConfigType("yaml")
 	if path != "" {
-		// p, _ := os.Getwd()
-		// plan, err := os.ReadFile(filepath.Join(p, path))
-		// fmt.Println(filepath.Join(p, path))
 		plan, err := os.ReadFile(path)
 		if err != nil {
 			panic(err)

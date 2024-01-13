@@ -19,7 +19,6 @@ type GoerliListener struct {
 
 
 func NewGoerliListener(ctx context.Context, cfg *bridgeCore.LsConfig, helpers bridgeCoreUtils.Utils, store stores.MainStore, pool *bridgeCore.Pool) (*GoerliListener, error) {
-	fmt.Println("Debug Dien1")
 	ethereumListener, err := bridgev2_listener.NewEthereumListener(ctx, cfg, helpers, store, pool)
 	if err != nil {
 		log.Error(fmt.Sprintf("[New%sListener] error while initialize Ethereum Listener", cfg.Name), "err", err, "url", cfg.RpcUrl)
